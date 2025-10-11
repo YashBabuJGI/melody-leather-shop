@@ -13,7 +13,22 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        serif: ['Playfair Display', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
       colors: {
+        leather: {
+          dark: 'hsl(var(--leather-dark))',
+          medium: 'hsl(var(--leather-medium))',
+          light: 'hsl(var(--leather-light))',
+        },
+        cognac: 'hsl(var(--cognac))',
+        tan: 'hsl(var(--tan))',
+        silver: {
+          DEFAULT: 'hsl(var(--silver))',
+          bright: 'hsl(var(--silver-bright))',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -84,6 +99,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.6s ease-out",
+        "slide-up": "slide-up 0.5s ease-out",
+        "scale-in": "scale-in 0.3s ease-out",
       },
     },
   },
