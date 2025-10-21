@@ -1,41 +1,24 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import { ProductCard } from '@/components/ProductCard';
 import { products } from '@/data/products';
-import { ArrowRight } from 'lucide-react';
-
-const videoSources = [
-  'https://assets.mixkit.co/videos/preview/mixkit-leather-jacket-detail-49906-large.mp4',
-  'https://assets.mixkit.co/videos/preview/mixkit-craftsman-working-with-leather-49903-large.mp4',
-  'https://assets.mixkit.co/videos/preview/mixkit-close-up-of-leather-material-49907-large.mp4',
-  'https://assets.mixkit.co/videos/preview/mixkit-person-wearing-leather-jacket-49905-large.mp4',
-];
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Home() {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const featuredProducts = products.slice(0, 8);
-
-  const handleSongChange = (songIndex: number) => {
-    setCurrentVideoIndex(songIndex % videoSources.length);
-  };
 
   return (
     <div className="min-h-screen">
-      <SpotifyPlayer onSongChange={handleSongChange} />
-      
       {/* Hero Section with Video Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <video
-          key={currentVideoIndex}
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover animate-fade-in"
         >
-          <source src={videoSources[currentVideoIndex]} type="video/mp4" />
+          <source src="/videos/hero_video.mp4" type="video/mp4" />
         </video>
         
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
@@ -61,6 +44,15 @@ export default function Home() {
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8"
               >
                 Our Craftsmanship
+              </Button>
+            </Link>
+            <Link to="/trial-room">
+              <Button 
+                size="lg" 
+                className="bg-accent text-white hover:bg-accent/90 text-lg px-8"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Virtual Trial Room
               </Button>
             </Link>
           </div>

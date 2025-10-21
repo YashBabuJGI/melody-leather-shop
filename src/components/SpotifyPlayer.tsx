@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { useLocation } from 'react-router-dom';
+import { productMusicMap, musicThemes } from '@/data/productMusicMap';
 
 interface SpotifyPlayerProps {
-  onSongChange: (songIndex: number) => void;
+  currentProductId?: string;
 }
 
 const playlist = [
@@ -34,12 +36,23 @@ const playlist = [
   },
 ];
 
-export const SpotifyPlayer = ({ onSongChange }: SpotifyPlayerProps) => {
+export const SpotifyPlayer = ({ currentProductId }: SpotifyPlayerProps) => {
+  const location = useLocation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState(0);
   const [volume, setVolume] = useState([70]);
   const [progress, setProgress] = useState(0);
+  const [currentTheme, setCurrentTheme] = useState(musicThemes[0]);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Change song based on product
+  useEffect(() => {
+    if (currentProductId && productMusicMap[currentProductId] !== undefined) {
+      const newSong = productMusicMap[currentProductId];
+      setCurrentSong(newSong);
+      setCurrentTheme(musicThemes[newSong]);
+    }
+  }, [currentProductId]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -94,8 +107,8 @@ export const SpotifyPlayer = ({ onSongChange }: SpotifyPlayerProps) => {
   }, [volume]);
 
   useEffect(() => {
-    onSongChange(currentSong);
-  }, [currentSong, onSongChange]);
+    setCurrentTheme(musicThemes[currentSong]);
+  }, [currentSong]);
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -116,43 +129,59 @@ export const SpotifyPlayer = ({ onSongChange }: SpotifyPlayerProps) => {
   return (
     <>
       <audio ref={audioRef} />
-      <div className="fixed top-20 right-4 z-40 bg-card/95 backdrop-blur-md rounded-lg shadow-luxury border border-border p-4 w-80 animate-fade-in">
+      <div 
+        className="fixed top-20 right-4 z-40 bg-card/95 backdrop-blur-md rounded-lg shadow-luxury border border-border p-4 w-80 animate-fade-in transition-all duration-500"
+        style={{
+          background: `linear-gradient(135deg, hsl(${currentTheme.primary}) 0%, hsl(${currentTheme.accent}) 100%)`,
+          boxShadow: `0 10px 40px -10px hsl(${currentTheme.primary} / 0.5)`
+        }}
+      >
       <div className="flex items-center space-x-3 mb-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-leather-dark to-leather-medium rounded flex items-center justify-center">
+        <div className="w-12 h-12 bg-white/20 backdrop-blur rounded flex items-center justify-center animate-pulse">
           <span className="text-white text-xl">♪</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{playlist[currentSong].title}</p>
-          <p className="text-xs text-muted-foreground truncate">{playlist[currentSong].artist}</p>
+          <p className="text-sm font-semibold truncate text-white">{playlist[currentSong].title}</p>
+          <p className="text-xs text-white/80 truncate">{playlist[currentSong].artist}</p>
         </div>
       </div>
 
-      <div className="w-full bg-muted h-1 rounded-full mb-3">
+      <div className="w-full bg-white/20 h-1 rounded-full mb-3">
         <div 
-          className="h-full bg-accent rounded-full transition-all duration-1000"
+          className="h-full bg-white rounded-full transition-all duration-1000"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       <div className="flex items-center justify-center space-x-4 mb-3">
-        <Button variant="ghost" size="icon" onClick={handlePrevious}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handlePrevious}
+          className="text-white hover:bg-white/20"
+        >
           <SkipBack className="h-4 w-4" />
         </Button>
         <Button 
           variant="default" 
           size="icon" 
           onClick={handlePlayPause}
-          className="bg-primary hover:bg-primary/90"
+          className="bg-white text-primary hover:bg-white/90"
         >
           {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </Button>
-        <Button variant="ghost" size="icon" onClick={handleNext}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleNext}
+          className="text-white hover:bg-white/20"
+        >
           <SkipForward className="h-4 w-4" />
         </Button>
       </div>
 
       <div className="flex items-center space-x-2">
-        <Volume2 className="h-4 w-4 text-muted-foreground" />
+        <Volume2 className="h-4 w-4 text-white/80" />
         <Slider
           value={volume}
           onValueChange={setVolume}

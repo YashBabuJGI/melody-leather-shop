@@ -35,9 +35,9 @@ export default function Products() {
   const materials = Array.from(new Set(products.map((p) => p.material)));
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
+    <div className="min-h-screen pt-24 pb-16 px-4 animate-fade-in">
       <div className="container mx-auto">
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Collection</h1>
           <p className="text-lg text-muted-foreground">
             Explore our range of premium leather goods

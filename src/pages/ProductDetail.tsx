@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { products } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
-import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Check, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function ProductDetail() {
@@ -11,6 +11,7 @@ export default function ProductDetail() {
   const { addToCart } = useCart();
   const product = products.find((p) => p.id === id);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   if (!product) {
     return (
@@ -34,24 +35,41 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
+    <div className="min-h-screen pt-24 pb-16 px-4 animate-fade-in">
       <div className="container mx-auto">
         <Link to="/products">
-          <Button variant="ghost" className="mb-6">
+          <Button variant="ghost" className="mb-6 transition-all hover:scale-105">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Products
           </Button>
         </Link>
 
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Product Images */}
+          {/* Product Images with Video Hover */}
           <div className="space-y-4">
-            <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-luxury bg-muted">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+            <div 
+              className="aspect-[3/4] rounded-lg overflow-hidden shadow-luxury bg-muted relative group cursor-pointer"
+              onMouseEnter={() => setIsVideoPlaying(true)}
+              onMouseLeave={() => setIsVideoPlaying(false)}
+            >
+              {isVideoPlaying ? (
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  <source src="/videos/product_cards.mp4" type="video/mp4" />
+                </video>
+              ) : (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
 
@@ -117,12 +135,23 @@ export default function ProductDetail() {
               <Button
                 size="lg"
                 onClick={handleAddToCart}
-                className="flex-1 bg-primary hover:bg-primary/90"
+                className="flex-1 bg-primary hover:bg-primary/90 transition-all hover:scale-105"
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart
               </Button>
             </div>
+
+            <Link to="/trial-room">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full transition-all hover:scale-105"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Try in Virtual Room
+              </Button>
+            </Link>
 
             <div className="bg-muted p-6 rounded-lg">
               <h3 className="font-semibold mb-3">Description</h3>
