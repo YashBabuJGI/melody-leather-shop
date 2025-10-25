@@ -7,6 +7,7 @@ import { productMusicMap, musicThemes } from '@/data/productMusicMap';
 
 interface SpotifyPlayerProps {
   currentProductId?: string;
+  hideOnHero?: boolean;
 }
 
 const playlist = [
@@ -36,9 +37,10 @@ const playlist = [
   },
 ];
 
-export const SpotifyPlayer = ({ currentProductId }: SpotifyPlayerProps) => {
+export const SpotifyPlayer = ({ currentProductId, hideOnHero = false }: SpotifyPlayerProps) => {
   const location = useLocation();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isHeroVisible, setIsHeroVisible] = useState(false);
   const [currentSong, setCurrentSong] = useState(0);
   const [volume, setVolume] = useState([70]);
   const [progress, setProgress] = useState(0);
@@ -109,6 +111,29 @@ export const SpotifyPlayer = ({ currentProductId }: SpotifyPlayerProps) => {
   useEffect(() => {
     setCurrentTheme(musicThemes[currentSong]);
   }, [currentSong]);
+
+  // Detect if hero section is in viewport
+  useEffect(() => {
+    if (!hideOnHero || location.pathname !== '/') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroVisible(entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
+
+    const heroSection = document.querySelector('section');
+    if (heroSection) {
+      observer.observe(heroSection);
+    }
+
+    return () => observer.disconnect();
+  }, [location.pathname, hideOnHero]);
+
+  if (hideOnHero && isHeroVisible && location.pathname === '/') {
+    return <audio ref={audioRef} />;
+  }
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);

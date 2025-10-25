@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/ProductCard';
 import { products } from '@/data/products';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { MagazineSection } from '@/components/MagazineSection';
 
 export default function Home() {
   const featuredProducts = products.slice(0, 8);
@@ -116,6 +117,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Magazine Section */}
+      <MagazineSection />
 
       {/* Categories Section */}
       <section className="py-20 px-4 bg-background">
