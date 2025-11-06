@@ -4,8 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { Header } from "./components/Header";
-import { SpotifyPlayer } from "./components/SpotifyPlayer";
+import { EnhancedSpotifyPlayer } from "./components/EnhancedSpotifyPlayer";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -13,6 +14,10 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import About from "./pages/About";
+import Auth from "./pages/Auth";
+import Settings from "./pages/Settings";
+import Orders from "./pages/Orders";
+import Billing from "./pages/Billing";
 import VirtualTrialRoom from "./pages/VirtualTrialRoom";
 import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
@@ -35,7 +40,7 @@ const AppContent = () => {
   return (
     <>
       <Header />
-      <SpotifyPlayer currentProductId={currentProductId} hideOnHero={true} />
+      <EnhancedSpotifyPlayer currentProductId={currentProductId} hideOnHero={true} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
@@ -44,6 +49,10 @@ const AppContent = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="/about" element={<About />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/billing" element={<Billing />} />
         <Route path="/trial-room" element={<VirtualTrialRoom />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -54,13 +63,15 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </CartProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <AppContent />
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
