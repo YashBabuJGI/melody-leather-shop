@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Header } from "./components/Header";
-import { EnhancedSpotifyPlayer } from "./components/EnhancedSpotifyPlayer";
+import { MinimizablePlayer } from "./components/MinimizablePlayer";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -40,7 +40,7 @@ const AppContent = () => {
   return (
     <>
       <Header />
-      <EnhancedSpotifyPlayer currentProductId={currentProductId} hideOnHero={true} />
+      <MinimizablePlayer currentProductId={currentProductId} hideOnHero={true} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
