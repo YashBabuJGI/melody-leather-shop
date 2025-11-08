@@ -1,12 +1,51 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/ProductCard';
-import { products } from '@/data/products';
+import { Product } from '@/types/product';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { MagazineSection } from '@/components/MagazineSection';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Home() {
-  const featuredProducts = products.slice(0, 8);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('in_stock', true)
+        .limit(8);
+
+      if (error) throw error;
+
+      const mappedProducts: Product[] = (data || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category as 'jacket' | 'belt' | 'buckle',
+        price: Number(p.price),
+        image: p.image_url,
+        images: p.images || [],
+        description: p.description || '',
+        material: p.material || '',
+        occasion: p.occasions || [],
+        finish: p.finish || '',
+        embossing: p.embossing,
+        pattern: p.pattern,
+        inStock: p.in_stock,
+        sizes: p.sizes || undefined,
+      }));
+
+      setFeaturedProducts(mappedProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen">

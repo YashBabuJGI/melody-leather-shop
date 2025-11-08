@@ -1,17 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { products } from '@/data/products';
+import { Product } from '@/types/product';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { ArrowLeft, ShoppingCart, Check, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { addToCart } = useCart();
-  const product = products.find((p) => p.id === id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      fetchProduct(id);
+    }
+  }, [id]);
+
+  const fetchProduct = async (productId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const mappedProduct: Product = {
+          id: data.id,
+          name: data.name,
+          category: data.category as 'jacket' | 'belt' | 'buckle',
+          price: Number(data.price),
+          image: data.image_url,
+          images: data.images || [],
+          description: data.description || '',
+          material: data.material || '',
+          occasion: data.occasions || [],
+          finish: data.finish || '',
+          embossing: data.embossing,
+          pattern: data.pattern,
+          inStock: data.in_stock,
+          sizes: data.sizes || undefined,
+        };
+        setProduct(mappedProduct);
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      toast.error('Failed to load product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

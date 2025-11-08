@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/ProductCard';
-import { products } from '@/data/products';
+import { Product } from '@/types/product';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -13,12 +15,64 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || 'all');
   const [selectedMaterial, setSelectedMaterial] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     }
   }, [categoryParam]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('in_stock', true);
+
+      if (error) throw error;
+
+      const mappedProducts: Product[] = (data || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category as 'jacket' | 'belt' | 'buckle',
+        price: Number(p.price),
+        image: p.image_url,
+        images: p.images || [],
+        description: p.description || '',
+        material: p.material || '',
+        occasion: p.occasions || [],
+        finish: p.finish || '',
+        embossing: p.embossing,
+        pattern: p.pattern,
+        inStock: p.in_stock,
+        sizes: p.sizes || undefined,
+      }));
+
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
 
   let filteredProducts = products.filter((product) => {
     if (selectedCategory !== 'all' && product.category !== selectedCategory) return false;

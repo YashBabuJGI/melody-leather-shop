@@ -1,26 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckoutFormData } from '@/types/product';
 import { ArrowLeft, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<'shipping' | 'payment'>('shipping');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<CheckoutFormData>({
-    email: '',
+    email: user?.email || '',
     firstName: '',
     lastName: '',
     address: '',
     city: '',
     state: '',
     zipCode: '',
-    country: 'United States',
+    country: 'India',
     cardNumber: '',
     expiryDate: '',
     cvv: '',
@@ -35,12 +45,139 @@ export default function Checkout() {
     setStep('payment');
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate payment processing
-    toast.success('Order placed successfully!');
-    clearCart();
-    navigate('/order-confirmation');
+    
+    if (!user) {
+      toast.error('Please login to complete your purchase');
+      navigate('/auth');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Calculate totals
+      const shipping = 50;
+      const tax = cartTotal * 0.08;
+      const total = cartTotal + shipping + tax;
+
+      // Create order in database
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          total_amount: total,
+          shipping_address: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          },
+          status: 'pending',
+          payment_status: 'pending',
+          payment_method: 'razorpay',
+        })
+        .select()
+        .single();
+
+      if (orderError || !order) {
+        throw new Error('Failed to create order');
+      }
+
+      // Create order items
+      const orderItems = cart.map((item) => ({
+        order_id: order.id,
+        product_id: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price,
+        selected_size: item.selectedSize,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) {
+        throw new Error('Failed to create order items');
+      }
+
+      // Create Razorpay order
+      const { data: razorpayData, error: razorpayError } = await supabase.functions.invoke(
+        'create-razorpay-order',
+        {
+          body: {
+            amount: total,
+            currency: 'INR',
+            receipt: order.id,
+          },
+        }
+      );
+
+      if (razorpayError || !razorpayData) {
+        throw new Error('Failed to create payment order');
+      }
+
+      // Open Razorpay payment modal
+      const options = {
+        key: razorpayData.keyId,
+        amount: razorpayData.amount,
+        currency: razorpayData.currency,
+        name: 'Wyoming Spur',
+        description: 'Premium Leather Goods',
+        order_id: razorpayData.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
+              'verify-razorpay-payment',
+              {
+                body: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  order_id: order.id,
+                },
+              }
+            );
+
+            if (verifyError || !verifyData?.success) {
+              throw new Error('Payment verification failed');
+            }
+
+            toast.success('Payment successful!');
+            clearCart();
+            navigate('/order-confirmation');
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            toast.error('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+        },
+        theme: {
+          color: '#8B4513',
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+            toast.error('Payment cancelled');
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to process checkout. Please try again.');
+      setIsProcessing(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -188,55 +325,35 @@ export default function Checkout() {
                 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                   <Lock className="h-4 w-4" />
-                  <span>Your payment information is secure and encrypted</span>
+                  <span>Secure payment powered by Razorpay</span>
                 </div>
 
-                <div>
-                  <Label htmlFor="cardNumber">Card Number</Label>
-                  <Input
-                    id="cardNumber"
-                    name="cardNumber"
-                    required
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    placeholder="1234 5678 9012 3456"
-                    maxLength={19}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="expiryDate">Expiry Date</Label>
-                    <Input
-                      id="expiryDate"
-                      name="expiryDate"
-                      required
-                      value={formData.expiryDate}
-                      onChange={handleInputChange}
-                      placeholder="MM/YY"
-                      maxLength={5}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cvv">CVV</Label>
-                    <Input
-                      id="cvv"
-                      name="cvv"
-                      required
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      placeholder="123"
-                      maxLength={4}
-                    />
-                  </div>
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Click "Proceed to Payment" to complete your order securely with Razorpay.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Accepts UPI, Cards, Wallets, and Net Banking.
+                  </p>
                 </div>
 
                 <div className="flex gap-4">
-                  <Button type="button" variant="outline" onClick={() => setStep('shipping')} className="flex-1">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setStep('shipping')} 
+                    className="flex-1"
+                    disabled={isProcessing}
+                  >
                     Back to Shipping
                   </Button>
-                  <Button type="submit" size="lg" className="flex-1 bg-accent hover:bg-accent/90">
-                    Place Order
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="flex-1 bg-accent hover:bg-accent/90"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? 'Processing...' : 'Proceed to Payment'}
                   </Button>
                 </div>
               </form>
