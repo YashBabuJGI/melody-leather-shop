@@ -19,6 +19,7 @@ import Settings from "./pages/Settings";
 import Orders from "./pages/Orders";
 import Billing from "./pages/Billing";
 import VirtualTrialRoom from "./pages/VirtualTrialRoom";
+import OrderTracking from "./pages/OrderTracking";
 import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
 
@@ -54,6 +55,7 @@ const AppContent = () => {
         <Route path="/orders" element={<Orders />} />
         <Route path="/billing" element={<Billing />} />
         <Route path="/trial-room" element={<VirtualTrialRoom />} />
+        <Route path="/order-tracking" element={<OrderTracking />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

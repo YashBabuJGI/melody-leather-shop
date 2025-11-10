@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Search, List, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Search, List, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -90,8 +90,12 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
   const [currentTheme, setCurrentTheme] = useState(musicThemes[0]);
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: window.innerWidth - 100, y: window.innerHeight - 100 });
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const audioRef = useRef<HTMLAudioElement>(null);
   const lastScrollY = useRef(0);
+  const playerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-minimize on scroll
   useEffect(() => {
@@ -110,6 +114,43 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isExpanded]);
+
+  // Dragging handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!isExpanded && playerRef.current) {
+      setIsDragging(true);
+      const rect = playerRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && !isExpanded) {
+        setPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset, isExpanded]);
 
   // Change song based on product
   useEffect(() => {
@@ -235,12 +276,21 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
       <>
         <audio ref={audioRef} />
         <div 
-          onClick={() => setIsExpanded(true)}
-          className="fixed bottom-6 right-6 z-40 cursor-pointer group animate-fade-in"
+          ref={playerRef}
+          onMouseDown={handleMouseDown}
+          onClick={(e) => {
+            if (!isDragging) {
+              setIsExpanded(true);
+            }
+          }}
           style={{
+            left: `${position.x}px`,
+            top: `${position.y}px`,
             background: `linear-gradient(135deg, hsl(${currentTheme.primary}) 0%, hsl(${currentTheme.accent}) 100%)`,
             boxShadow: `0 10px 40px -10px hsl(${currentTheme.primary} / 0.5)`,
+            cursor: isDragging ? 'grabbing' : 'grab'
           }}
+          className="fixed z-40 group animate-fade-in"
         >
           <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-2xl border-2 border-white/20 transition-transform hover:scale-110">
             <img 
@@ -248,9 +298,12 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
               alt={playlist[currentSong].title}
               className="w-full h-full object-cover"
             />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <GripVertical className="w-6 h-6 text-white" />
+            </div>
             {isPlaying && (
-              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              <div className="absolute top-1 right-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">

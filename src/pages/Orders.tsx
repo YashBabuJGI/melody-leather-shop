@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
@@ -92,7 +93,7 @@ const Orders = () => {
             {orders.map((order) => (
               <Card key={order.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start flex-wrap gap-4">
                     <div>
                       <CardTitle className="text-lg">
                         Order #{order.id.slice(0, 8)}
@@ -101,13 +102,20 @@ const Orders = () => {
                         {format(new Date(order.created_at), 'PPP')}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex flex-col gap-2">
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>
-                      <p className="text-lg font-bold mt-2">
+                      <p className="text-lg font-bold">
                         ${order.total_amount.toFixed(2)}
                       </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/order-tracking?orderId=${order.id}`)}
+                      >
+                        Track Order
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
