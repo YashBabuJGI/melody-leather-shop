@@ -91,6 +91,7 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
   const [position, setPosition] = useState({ x: window.innerWidth - 100, y: window.innerHeight - 100 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -119,6 +120,7 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isExpanded && playerRef.current) {
       setIsDragging(true);
+      setHasDragged(false);
       const rect = playerRef.current.getBoundingClientRect();
       setDragOffset({
         x: e.clientX - rect.left,
@@ -130,6 +132,7 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging && !isExpanded) {
+        setHasDragged(true);
         setPosition({
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y
@@ -279,7 +282,7 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
           ref={playerRef}
           onMouseDown={handleMouseDown}
           onClick={(e) => {
-            if (!isDragging) {
+            if (!hasDragged) {
               setIsExpanded(true);
             }
           }}
@@ -320,11 +323,14 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
     <>
       <audio ref={audioRef} />
       <div 
-        className="fixed bottom-6 right-6 z-40 rounded-xl shadow-2xl border border-border transition-all duration-500 animate-scale-in"
+        className="fixed z-40 rounded-xl shadow-2xl border border-border transition-all duration-500 animate-scale-in"
         style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
           background: `linear-gradient(135deg, hsl(${currentTheme.primary}) 0%, hsl(${currentTheme.accent}) 100%)`,
           boxShadow: `0 10px 40px -10px hsl(${currentTheme.primary} / 0.5)`,
-          width: showPlaylist ? '380px' : '320px'
+          width: showPlaylist ? '380px' : '320px',
+          transform: 'translate(-50%, -50%)'
         }}
       >
         <div className="bg-black/20 backdrop-blur-xl rounded-xl p-4">

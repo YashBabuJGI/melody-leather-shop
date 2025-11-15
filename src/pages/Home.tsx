@@ -27,7 +27,7 @@ export default function Home() {
       const mappedProducts: Product[] = (data || []).map((p) => ({
         id: p.id,
         name: p.name,
-        category: p.category as 'jacket' | 'belt' | 'buckle',
+        category: p.category as 'belt' | 'buckle' | 'jewelry' | 'hat',
         price: Number(p.price),
         image: p.image_url,
         images: p.images || [],
@@ -131,14 +131,16 @@ export default function Home() {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold mb-6">Meticulous Craftsmanship</h2>
+              <h2 className="text-4xl font-bold mb-6">Leather Belt Craftsmanship</h2>
               <p className="text-lg mb-4 leading-relaxed">
-                We handpick superior skins which undergo many steps before the final product is achieved, 
-                including bonding the lining, cutting, sanding, painting and stitching the edges.
+                Every leather belt is meticulously handcrafted from premium full-grain leather. Each piece 
+                undergoes careful selection, cutting, edge finishing, and hand-stitching to ensure exceptional 
+                durability and timeless style.
               </p>
               <p className="text-lg mb-6 leading-relaxed">
-                Most of that is done by hand. During this process of meticulous craftsmanship, only the 
-                utmost quality is ensured down to the smallest detail.
+                Our artisan buckles are individually cast and finished, featuring intricate silver detailing 
+                that pairs perfectly with our hand-tooled leather straps. Each belt represents hours of skilled 
+                craftsmanship and attention to the finest details.
               </p>
               <Link to="/about">
                 <Button size="lg">
@@ -148,8 +150,8 @@ export default function Home() {
             </div>
             <div className="aspect-square rounded-lg overflow-hidden shadow-luxury">
               <img
-                src="/placeholder.svg"
-                alt="Craftsmanship"
+                src="https://images.unsplash.com/photo-1611312449412-6cefac5dc219?w=800&q=80"
+                alt="Handcrafted Leather Belts and Silver Buckles"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -164,9 +166,8 @@ export default function Home() {
       <section className="py-20 px-4 bg-background">
         <div className="container mx-auto">
           <h2 className="text-4xl font-bold text-center mb-12">Shop By Category</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
-              { name: 'Leather Jackets', category: 'jacket', image: '/placeholder.svg' },
               { name: 'Premium Belts', category: 'belt', image: '/placeholder.svg' },
               { name: 'Silver Buckles', category: 'buckle', image: '/placeholder.svg' },
             ].map((cat) => (

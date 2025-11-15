@@ -36,7 +36,7 @@ export default function ProductDetail() {
         const mappedProduct: Product = {
           id: data.id,
           name: data.name,
-          category: data.category as 'jacket' | 'belt' | 'buckle',
+          category: data.category as 'belt' | 'buckle' | 'jewelry' | 'hat',
           price: Number(data.price),
           image: data.image_url,
           images: data.images || [],

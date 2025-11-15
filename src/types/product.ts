@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
   name: string;
-  category: 'jacket' | 'belt' | 'buckle' | 'jewelry' | 'hat';
+  category: 'belt' | 'buckle' | 'jewelry' | 'hat';
   price: number;
   image: string;
   images: string[];

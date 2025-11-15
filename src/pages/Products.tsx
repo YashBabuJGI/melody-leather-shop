@@ -40,7 +40,7 @@ export default function Products() {
       const mappedProducts: Product[] = (data || []).map((p) => ({
         id: p.id,
         name: p.name,
-        category: p.category as 'jacket' | 'belt' | 'buckle',
+        category: p.category as 'belt' | 'buckle' | 'jewelry' | 'hat',
         price: Number(p.price),
         image: p.image_url,
         images: p.images || [],
@@ -111,9 +111,10 @@ export default function Products() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="jacket">Jackets</SelectItem>
               <SelectItem value="belt">Belts</SelectItem>
               <SelectItem value="buckle">Buckles</SelectItem>
+              <SelectItem value="jewelry">Jewelry</SelectItem>
+              <SelectItem value="hat">Hats</SelectItem>
             </SelectContent>
           </Select>
 

@@ -134,14 +134,12 @@ const CowboyCharacter = ({ jacket, belt }: { jacket: boolean; belt: boolean }) =
 
 export default function VirtualTrialRoom() {
   const [selectedItems, setSelectedItems] = useState({
-    jacket: false,
     belt: false,
   });
 
-  const jackets = products.filter(p => p.category === 'jacket').slice(0, 3);
-  const belts = products.filter(p => p.category === 'belt').slice(0, 3);
+  const belts = products.filter(p => p.category === 'belt').slice(0, 6);
 
-  const toggleItem = (item: 'jacket' | 'belt') => {
+  const toggleItem = (item: 'belt') => {
     setSelectedItems(prev => ({
       ...prev,
       [item]: !prev[item],
@@ -150,7 +148,7 @@ export default function VirtualTrialRoom() {
   };
 
   const resetCowboy = () => {
-    setSelectedItems({ jacket: false, belt: false });
+    setSelectedItems({ belt: false });
     toast.info('Outfit reset to default');
   };
 
@@ -181,7 +179,7 @@ export default function VirtualTrialRoom() {
                 <spotLight position={[-10, 10, -5]} angle={0.3} penumbra={1} intensity={0.6} castShadow />
                 <Environment preset="sunset" />
                 <CowboyCharacter 
-                  jacket={selectedItems.jacket}
+                  jacket={false}
                   belt={selectedItems.belt}
                 />
               </Canvas>
@@ -201,29 +199,6 @@ export default function VirtualTrialRoom() {
 
           {/* Item Selection Panel */}
           <div className="space-y-6">
-            <div className="bg-card rounded-lg shadow-card p-6">
-              <h3 className="text-xl font-bold mb-4">Leather Jackets</h3>
-              <div className="space-y-3">
-                {jackets.map(product => (
-                  <button
-                    key={product.id}
-                    onClick={() => toggleItem('jacket')}
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all hover:scale-105 ${
-                      selectedItems.jacket 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" />
-                    <div className="text-left flex-1">
-                      <p className="font-semibold text-sm">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">${product.price}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <div className="bg-card rounded-lg shadow-card p-6">
               <h3 className="text-xl font-bold mb-4">Premium Belts</h3>
               <div className="space-y-3">
