@@ -61,8 +61,11 @@ export const Header = () => {
           </div>
 
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link to="/products?category=jacket" className="text-sm font-medium hover:text-primary transition-colors">
-              Jackets
+            <Link to="/belt-builder" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+              <span className="relative">
+                Belt Builder
+                <span className="absolute -top-1 -right-8 text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full">NEW</span>
+              </span>
             </Link>
             <Link to="/products?category=belt" className="text-sm font-medium hover:text-primary transition-colors">
               Belts
