@@ -71,8 +71,18 @@ export default function Home() {
             Premium leather goods with meticulous attention to detail
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/belt-builder">
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 relative overflow-hidden group">
+                <span className="absolute inset-0 bg-gradient-to-r from-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="relative flex items-center">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Build Your Belt
+                  <span className="ml-2 text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full">NEW</span>
+                </span>
+              </Button>
+            </Link>
             <Link to="/products">
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8">
+              <Button size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8">
                 Shop Collection
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -84,15 +94,6 @@ export default function Home() {
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8"
               >
                 Our Craftsmanship
-              </Button>
-            </Link>
-            <Link to="/trial-room">
-              <Button 
-                size="lg" 
-                className="bg-accent text-white hover:bg-accent/90 text-lg px-8"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                Virtual Trial Room
               </Button>
             </Link>
           </div>
@@ -161,6 +162,47 @@ export default function Home() {
 
       {/* Magazine Section */}
       <MagazineSection />
+
+      {/* Belt Builder CTA */}
+      <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-accent/5">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-accent/20 text-accent-foreground px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <Sparkles className="h-4 w-4" />
+              <span>New Feature</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Design Your Perfect Belt</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Create a one-of-a-kind belt by combining your favorite leather strap with the perfect 
+              buckle. Each custom piece is handcrafted to order with premium materials.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-3xl mb-3">🎨</div>
+                <h3 className="font-semibold mb-2">Choose Your Strap</h3>
+                <p className="text-sm text-muted-foreground">Select from premium leather types, colors, and widths</p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-3xl mb-3">✨</div>
+                <h3 className="font-semibold mb-2">Pick Your Buckle</h3>
+                <p className="text-sm text-muted-foreground">Match with hand-cast silver buckles in various designs</p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-3xl mb-3">📏</div>
+                <h3 className="font-semibold mb-2">Select Your Size</h3>
+                <p className="text-sm text-muted-foreground">Get the perfect fit with our comprehensive size range</p>
+              </div>
+            </div>
+            <Link to="/belt-builder">
+              <Button size="lg" className="text-lg px-10 py-6 h-auto">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Start Building Your Belt
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Categories Section */}
       <section className="py-20 px-4 bg-background">
