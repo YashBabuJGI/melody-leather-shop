@@ -9,6 +9,7 @@ import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
 import SizingGuideModal from '@/components/SizingGuideModal';
+import BeltVisualizer3D from '@/components/BeltVisualizer3D';
 
 interface BeltStrap {
   id: string;
@@ -218,43 +219,17 @@ export default function BeltBuilder() {
                 </div>
               </div>
 
-              {/* Visual Preview with Person */}
+              {/* 3D Visual Preview */}
               <div className="mb-6">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Visualization</p>
-                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-gradient-to-b from-muted to-muted/50">
-                  {/* Person Silhouette */}
-                  <img 
-                    src={selectedGender === 'male' 
-                      ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop&crop=faces'
-                      : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80&fit=crop&crop=faces'
-                    }
-                    alt={`${selectedGender} model`}
-                    className="w-full h-full object-cover object-top"
-                  />
-                  {/* Belt Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div 
-                      className="absolute w-[85%] h-16 rounded-sm shadow-2xl"
-                      style={{
-                        top: '52%',
-                        backgroundImage: `url(${selectedStrap.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        opacity: 0.95,
-                      }}
-                    >
-                      {selectedBuckle && (
-                        <div className="absolute left-[35%] top-1/2 -translate-y-1/2 w-14 h-14 rounded-sm shadow-xl">
-                          <img 
-                            src={selectedBuckle.image} 
-                            alt={selectedBuckle.name}
-                            className="w-full h-full object-contain"
-                            style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">3D Preview</p>
+                <div className="relative aspect-[3/4] rounded-lg overflow-hidden">
+                  {selectedBuckle && (
+                    <BeltVisualizer3D 
+                      strapImage={selectedStrap.image}
+                      buckleImage={selectedBuckle.image}
+                      gender={selectedGender}
+                    />
+                  )}
                 </div>
               </div>
               
