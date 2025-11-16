@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Check, ShoppingCart, Info } from 'lucide-react';
+import { Check, ShoppingCart, Info, Ruler } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
+import SizingGuideModal from '@/components/SizingGuideModal';
 
 interface BeltStrap {
   id: string;
@@ -83,6 +84,8 @@ export default function BeltBuilder() {
   const [selectedStrap, setSelectedStrap] = useState<BeltStrap>(beltStraps[0]);
   const [selectedBuckle, setSelectedBuckle] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>('34"');
+  const [selectedGender, setSelectedGender] = useState<'male' | 'female'>('male');
+  const [showSizingGuide, setShowSizingGuide] = useState(false);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
 
@@ -168,6 +171,8 @@ export default function BeltBuilder() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 bg-background animate-fade-in">
+      <SizingGuideModal open={showSizingGuide} onOpenChange={setShowSizingGuide} />
+      
       <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -176,6 +181,14 @@ export default function BeltBuilder() {
             Design your perfect belt by selecting a premium leather strap, matching buckle, and size. 
             Each combination is handcrafted to order.
           </p>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowSizingGuide(true)}
+            className="mt-4"
+          >
+            <Ruler className="mr-2 h-4 w-4" />
+            View Sizing Guide
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -183,6 +196,67 @@ export default function BeltBuilder() {
           <div className="lg:col-span-1">
             <Card className="p-6 sticky top-24">
               <h3 className="text-xl font-bold mb-4">Your Custom Belt</h3>
+              
+              {/* Gender Selection */}
+              <div className="mb-6">
+                <p className="text-sm font-medium text-muted-foreground mb-2">Preview On</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={selectedGender === 'male' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGender('male')}
+                    className="w-full"
+                  >
+                    Male
+                  </Button>
+                  <Button
+                    variant={selectedGender === 'female' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGender('female')}
+                    className="w-full"
+                  >
+                    Female
+                  </Button>
+                </div>
+              </div>
+
+              {/* Visual Preview with Person */}
+              <div className="mb-6">
+                <p className="text-sm font-medium text-muted-foreground mb-2">Visualization</p>
+                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-gradient-to-b from-muted to-muted/50">
+                  {/* Person Silhouette */}
+                  <img 
+                    src={selectedGender === 'male' 
+                      ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop&crop=faces'
+                      : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80&fit=crop&crop=faces'
+                    }
+                    alt={`${selectedGender} model`}
+                    className="w-full h-full object-cover object-top"
+                  />
+                  {/* Belt Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div 
+                      className="absolute w-[85%] h-16 rounded-sm shadow-2xl"
+                      style={{
+                        top: '52%',
+                        backgroundImage: `url(${selectedStrap.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        opacity: 0.95,
+                      }}
+                    >
+                      {selectedBuckle && (
+                        <div className="absolute left-[35%] top-1/2 -translate-y-1/2 w-14 h-14 rounded-sm shadow-xl">
+                          <img 
+                            src={selectedBuckle.image} 
+                            alt={selectedBuckle.name}
+                            className="w-full h-full object-contain"
+                            style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               {/* Strap Preview */}
               <div className="mb-6">
@@ -372,7 +446,17 @@ export default function BeltBuilder() {
               </div>
 
               <div className="mt-6 p-4 bg-muted rounded-lg">
-                <p className="text-sm font-medium mb-2">Sizing Guide</p>
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm font-medium">Need Help with Sizing?</p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowSizingGuide(true)}
+                    className="h-auto p-0 text-primary hover:text-primary/80"
+                  >
+                    <Ruler className="h-4 w-4" />
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Choose your pant size or measure around your waist where you'll wear the belt. 
                   For the perfect fit, select one size larger than your actual waist measurement.
