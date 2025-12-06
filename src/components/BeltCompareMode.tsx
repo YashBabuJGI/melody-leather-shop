@@ -51,8 +51,8 @@ export default function BeltCompareMode({ straps, buckles, onClose }: BeltCompar
     combo.strap.price + (combo.buckle?.price || 0);
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-auto">
-      <div className="container mx-auto py-8 px-4">
+    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto">
+      <div className="container mx-auto py-8 px-4 pb-24">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -174,13 +174,17 @@ function ComboPanel({
       </div>
 
       {/* 3D Preview */}
-      <div className="aspect-[3/4] rounded-lg overflow-hidden mb-4 bg-muted">
-        {combo.buckle && (
+      <div className="aspect-[3/4] rounded-lg overflow-hidden mb-4 bg-muted min-h-[200px]">
+        {combo.buckle ? (
           <BeltVisualizer3D
             strapImage={combo.strap.image}
             buckleImage={combo.buckle.image}
             gender={combo.gender}
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+            Select a buckle
+          </div>
         )}
       </div>
 

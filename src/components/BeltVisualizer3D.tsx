@@ -1,7 +1,7 @@
-import { Canvas, useLoader } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import { Suspense, useMemo } from 'react';
-import * as THREE from 'three';
+import { Suspense, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface BeltVisualizer3DProps {
   strapImage: string;
@@ -9,45 +9,26 @@ interface BeltVisualizer3DProps {
   gender: 'male' | 'female';
 }
 
-function BeltModel({ strapImage, buckleImage }: { strapImage: string; buckleImage: string }) {
-  // Load textures from the image URLs
-  const strapTexture = useLoader(THREE.TextureLoader, strapImage);
-  const buckleTexture = useLoader(THREE.TextureLoader, buckleImage);
-
-  // Configure textures for better appearance
-  useMemo(() => {
-    if (strapTexture) {
-      strapTexture.wrapS = THREE.RepeatWrapping;
-      strapTexture.wrapT = THREE.ClampToEdgeWrapping;
-      strapTexture.repeat.set(3, 1);
-    }
-    if (buckleTexture) {
-      buckleTexture.wrapS = THREE.ClampToEdgeWrapping;
-      buckleTexture.wrapT = THREE.ClampToEdgeWrapping;
-    }
-  }, [strapTexture, buckleTexture]);
-
+function BeltModel({ strapColor, buckleColor }: { strapColor: string; buckleColor: string }) {
   return (
     <group position={[0, -0.2, 0]}>
-      {/* Belt Strap - positioned at waist with leather texture */}
+      {/* Belt Strap - positioned at waist */}
       <mesh position={[0, 0, 0]} rotation={[0, 0, 0]} castShadow>
         <boxGeometry args={[3, 0.15, 0.05]} />
         <meshStandardMaterial 
-          map={strapTexture}
+          color={strapColor}
           metalness={0.1}
           roughness={0.8}
-          normalScale={new THREE.Vector2(0.5, 0.5)}
         />
       </mesh>
       
-      {/* Belt Buckle with actual buckle texture */}
+      {/* Belt Buckle */}
       <mesh position={[0, 0, 0.03]} castShadow>
         <boxGeometry args={[0.25, 0.2, 0.05]} />
         <meshStandardMaterial 
-          map={buckleTexture}
+          color={buckleColor}
           metalness={0.85}
           roughness={0.15}
-          envMapIntensity={1.5}
         />
       </mesh>
 
@@ -109,7 +90,7 @@ function PersonModel({ gender }: { gender: 'male' | 'female' }) {
   );
 }
 
-function Scene({ strapImage, buckleImage, gender }: BeltVisualizer3DProps) {
+function Scene({ gender, strapColor, buckleColor }: { gender: 'male' | 'female'; strapColor: string; buckleColor: string }) {
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 1, 4]} fov={50} />
@@ -122,14 +103,12 @@ function Scene({ strapImage, buckleImage, gender }: BeltVisualizer3DProps) {
         minPolarAngle={Math.PI / 5}
       />
       
-      {/* Enhanced Lighting for texture visibility */}
+      {/* Enhanced Lighting */}
       <ambientLight intensity={0.5} />
       <directionalLight 
         position={[5, 8, 5]} 
         intensity={1.2} 
         castShadow 
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
       />
       <directionalLight position={[-5, 5, -5]} intensity={0.6} />
       <spotLight position={[0, 5, 0]} intensity={0.8} angle={0.6} penumbra={0.5} />
@@ -139,9 +118,7 @@ function Scene({ strapImage, buckleImage, gender }: BeltVisualizer3DProps) {
       <PersonModel gender={gender} />
       
       {/* Belt Model positioned at waist */}
-      <Suspense fallback={null}>
-        <BeltModel strapImage={strapImage} buckleImage={buckleImage} />
-      </Suspense>
+      <BeltModel strapColor={strapColor} buckleColor={buckleColor} />
       
       {/* Ground with shadow */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
@@ -156,26 +133,55 @@ function Scene({ strapImage, buckleImage, gender }: BeltVisualizer3DProps) {
   );
 }
 
+function LoadingFallback() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+      <div className="flex flex-col items-center gap-2">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading 3D model...</p>
+      </div>
+    </div>
+  );
+}
+
 export default function BeltVisualizer3D({ strapImage, buckleImage, gender }: BeltVisualizer3DProps) {
+  const [hasError, setHasError] = useState(false);
+  
+  // Use colors based on image URLs as a simple approach
+  const strapColor = strapImage?.includes('black') || strapImage?.includes('alligator') ? '#2c2c2c' : '#8B4513';
+  const buckleColor = '#C0C0C0';
+
+  if (hasError) {
+    return (
+      <div className="relative w-full h-full rounded-lg overflow-hidden bg-gradient-to-b from-muted via-background to-muted/50 flex items-center justify-center">
+        <div className="text-center p-4">
+          <p className="text-sm text-muted-foreground">3D preview unavailable</p>
+          <p className="text-xs text-muted-foreground mt-1">View images below</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden bg-gradient-to-b from-muted via-background to-muted/50">
-      <Canvas 
-        shadows 
-        gl={{ 
-          antialias: true,
-          alpha: true,
-          powerPreference: "high-performance" 
-        }}
-      >
-        <Suspense fallback={null}>
-          <Scene strapImage={strapImage} buckleImage={buckleImage} gender={gender} />
-        </Suspense>
-      </Canvas>
+      <Suspense fallback={<LoadingFallback />}>
+        <Canvas 
+          shadows 
+          gl={{ 
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance" 
+          }}
+          onError={() => setHasError(true)}
+        >
+          <Scene strapColor={strapColor} buckleColor={buckleColor} gender={gender} />
+        </Canvas>
+      </Suspense>
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border/50 shadow-lg">
         🖱️ Drag to rotate • 🔍 Scroll to zoom
       </div>
       <div className="absolute top-2 right-2 text-xs text-muted-foreground bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md border border-border/50">
-        Real Textures
+        3D Preview
       </div>
     </div>
   );

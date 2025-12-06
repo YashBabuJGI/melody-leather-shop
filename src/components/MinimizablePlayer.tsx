@@ -92,11 +92,23 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [hasDragged, setHasDragged] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 100, y: window.innerHeight - 100 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isPositioned, setIsPositioned] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const audioRef = useRef<HTMLAudioElement>(null);
   const lastScrollY = useRef(0);
   const playerRef = useRef<HTMLDivElement | null>(null);
+
+  // Initialize position safely after mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isPositioned) {
+      setPosition({ 
+        x: Math.max(16, window.innerWidth - 100), 
+        y: Math.max(16, window.innerHeight - 100) 
+      });
+      setIsPositioned(true);
+    }
+  }, [isPositioned]);
 
   // Auto-minimize on scroll
   useEffect(() => {
@@ -133,9 +145,12 @@ export const MinimizablePlayer = ({ currentProductId, hideOnHero = false }: Mini
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging && !isExpanded) {
         setHasDragged(true);
+        // Constrain position within viewport bounds
+        const maxX = window.innerWidth - 80;
+        const maxY = window.innerHeight - 80;
         setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y
+          x: Math.min(Math.max(16, e.clientX - dragOffset.x), maxX),
+          y: Math.min(Math.max(16, e.clientY - dragOffset.y), maxY)
         });
       }
     };
