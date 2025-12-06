@@ -3,13 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Check, ShoppingCart, Info, Ruler } from 'lucide-react';
+import { Check, ShoppingCart, Info, Ruler, GitCompare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
 import SizingGuideModal from '@/components/SizingGuideModal';
 import BeltVisualizer3D from '@/components/BeltVisualizer3D';
+import BeltCompareMode from '@/components/BeltCompareMode';
 
 interface BeltStrap {
   id: string;
@@ -87,6 +88,7 @@ export default function BeltBuilder() {
   const [selectedSize, setSelectedSize] = useState<string>('34"');
   const [selectedGender, setSelectedGender] = useState<'male' | 'female'>('male');
   const [showSizingGuide, setShowSizingGuide] = useState(false);
+  const [showCompareMode, setShowCompareMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
 
@@ -173,6 +175,13 @@ export default function BeltBuilder() {
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 bg-background animate-fade-in">
       <SizingGuideModal open={showSizingGuide} onOpenChange={setShowSizingGuide} />
+      {showCompareMode && (
+        <BeltCompareMode 
+          straps={beltStraps} 
+          buckles={buckles} 
+          onClose={() => setShowCompareMode(false)} 
+        />
+      )}
       
       <div className="container mx-auto">
         {/* Header */}
@@ -182,14 +191,23 @@ export default function BeltBuilder() {
             Design your perfect belt by selecting a premium leather strap, matching buckle, and size. 
             Each combination is handcrafted to order.
           </p>
-          <Button 
-            variant="outline" 
-            onClick={() => setShowSizingGuide(true)}
-            className="mt-4"
-          >
-            <Ruler className="mr-2 h-4 w-4" />
-            View Sizing Guide
-          </Button>
+          <div className="flex gap-3 justify-center mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSizingGuide(true)}
+            >
+              <Ruler className="mr-2 h-4 w-4" />
+              View Sizing Guide
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCompareMode(true)}
+              disabled={buckles.length < 1}
+            >
+              <GitCompare className="mr-2 h-4 w-4" />
+              Compare Mode
+            </Button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
