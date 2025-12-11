@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Search, Menu, User, Settings, Package, Receipt, LogOut, LogIn } from 'lucide-react';
+import { ShoppingCart, Search, Menu, User, Settings, Package, Receipt, LogOut, LogIn, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdmin } from '@/hooks/useAdmin';
 import { useState } from 'react';
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
 export const Header = () => {
   const { cartCount } = useCart();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const [gender, setGender] = useState<'men' | 'women'>('men');
 
   return (
@@ -118,6 +120,14 @@ export const Header = () => {
                         Billing History
                       </Link>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center cursor-pointer">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
                       <LogOut className="mr-2 h-4 w-4" />

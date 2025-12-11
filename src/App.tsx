@@ -21,6 +21,7 @@ import Billing from "./pages/Billing";
 import VirtualTrialRoom from "./pages/VirtualTrialRoom";
 import OrderTracking from "./pages/OrderTracking";
 import BeltBuilder from "./pages/BeltBuilder";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
 
@@ -58,6 +59,7 @@ const AppContent = () => {
         <Route path="/trial-room" element={<VirtualTrialRoom />} />
         <Route path="/belt-builder" element={<BeltBuilder />} />
         <Route path="/order-tracking" element={<OrderTracking />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
