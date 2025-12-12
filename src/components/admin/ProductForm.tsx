@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, Plus, Save } from 'lucide-react';
+import { Loader2, Plus, Save, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ProductFormData {
   name: string;
@@ -57,6 +59,10 @@ const generateSlug = (name: string) => {
 
 const ProductForm = ({ initialData, onSubmit, isSubmitting, mode }: ProductFormProps) => {
   const [formData, setFormData] = useState<ProductFormData>(initialData || defaultFormData);
+  const [uploadingMain, setUploadingMain] = useState(false);
+  const [uploadingAdditional, setUploadingAdditional] = useState(false);
+  const mainImageInputRef = useRef<HTMLInputElement>(null);
+  const additionalImagesInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -72,6 +78,80 @@ const ProductForm = ({ initialData, onSubmit, isSubmitting, mode }: ProductFormP
     }));
   };
 
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `products/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Upload error:', error);
+      toast.error(`Failed to upload ${file.name}`);
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filePath);
+
+    return urlData.publicUrl;
+  };
+
+  const handleMainImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMain(true);
+    const url = await uploadImage(file);
+    if (url) {
+      setFormData(prev => ({ ...prev, image_url: url }));
+      toast.success('Main image uploaded');
+    }
+    setUploadingMain(false);
+    if (mainImageInputRef.current) {
+      mainImageInputRef.current.value = '';
+    }
+  };
+
+  const handleAdditionalImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingAdditional(true);
+    const uploadedUrls: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const url = await uploadImage(file);
+      if (url) {
+        uploadedUrls.push(url);
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      setFormData(prev => {
+        const existingImages = prev.images ? prev.images.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const newImages = [...existingImages, ...uploadedUrls];
+        return { ...prev, images: newImages.join(', ') };
+      });
+      toast.success(`${uploadedUrls.length} image(s) uploaded`);
+    }
+    setUploadingAdditional(false);
+    if (additionalImagesInputRef.current) {
+      additionalImagesInputRef.current.value = '';
+    }
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setFormData(prev => {
+      const images = prev.images.split(',').map(s => s.trim()).filter(Boolean);
+      images.splice(index, 1);
+      return { ...prev, images: images.join(', ') };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit(formData);
@@ -79,6 +159,8 @@ const ProductForm = ({ initialData, onSubmit, isSubmitting, mode }: ProductFormP
       setFormData(defaultFormData);
     }
   };
+
+  const additionalImages = formData.images ? formData.images.split(',').map(s => s.trim()).filter(Boolean) : [];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -137,25 +219,95 @@ const ProductForm = ({ initialData, onSubmit, isSubmitting, mode }: ProductFormP
         </div>
       </div>
 
+      {/* Main Image Upload */}
       <div className="space-y-2">
-        <Label htmlFor="image_url">Main Image URL *</Label>
-        <Input
-          id="image_url"
-          value={formData.image_url}
-          onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-          required
-          placeholder="https://example.com/image.jpg"
-        />
+        <Label>Main Image *</Label>
+        <div className="flex gap-3 items-start">
+          <div className="flex-1">
+            <Input
+              value={formData.image_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+              required
+              placeholder="Upload or paste URL"
+            />
+          </div>
+          <input
+            ref={mainImageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleMainImageUpload}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => mainImageInputRef.current?.click()}
+            disabled={uploadingMain}
+          >
+            {uploadingMain ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          </Button>
+        </div>
+        {formData.image_url && (
+          <div className="mt-2 relative w-24 h-24 rounded-md overflow-hidden border border-border">
+            <img src={formData.image_url} alt="Main" className="w-full h-full object-cover" />
+          </div>
+        )}
       </div>
 
+      {/* Additional Images Upload */}
       <div className="space-y-2">
-        <Label htmlFor="images">Additional Images (comma-separated URLs)</Label>
+        <Label>Additional Images</Label>
+        <div className="flex gap-3 items-center">
+          <input
+            ref={additionalImagesInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleAdditionalImagesUpload}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => additionalImagesInputRef.current?.click()}
+            disabled={uploadingAdditional}
+            className="w-full"
+          >
+            {uploadingAdditional ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Upload Additional Images
+              </>
+            )}
+          </Button>
+        </div>
+        {additionalImages.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {additionalImages.map((url, index) => (
+              <div key={index} className="relative w-20 h-20 rounded-md overflow-hidden border border-border group">
+                <img src={url} alt={`Additional ${index + 1}`} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeAdditionalImage(index)}
+                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <Textarea
-          id="images"
           value={formData.images}
           onChange={(e) => setFormData(prev => ({ ...prev, images: e.target.value }))}
-          placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg"
+          placeholder="Or paste comma-separated URLs"
           rows={2}
+          className="mt-2"
         />
       </div>
 
