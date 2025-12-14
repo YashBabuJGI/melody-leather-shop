@@ -5,7 +5,8 @@ import { useCart } from '@/contexts/CartContext';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,11 +16,50 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+interface NavItem {
+  id: string;
+  name: string;
+  url: string;
+  item_order: number;
+  is_active: boolean;
+}
+
+const defaultNavItems = [
+  { id: '1', name: 'Belt Builder', url: '/belt-builder', item_order: 0, is_active: true },
+  { id: '2', name: 'Belts', url: '/products?category=belt', item_order: 1, is_active: true },
+  { id: '3', name: 'Buckles', url: '/products?category=buckle', item_order: 2, is_active: true },
+  { id: '4', name: 'Jewelry', url: '/products?category=jewelry', item_order: 3, is_active: true },
+  { id: '5', name: 'Hats', url: '/products?category=hat', item_order: 4, is_active: true },
+  { id: '6', name: 'Craftsmanship', url: '/about', item_order: 5, is_active: true },
+];
+
 export const Header = () => {
   const { cartCount } = useCart();
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const [gender, setGender] = useState<'men' | 'women'>('men');
+  const [navItems, setNavItems] = useState<NavItem[]>(defaultNavItems);
+
+  useEffect(() => {
+    fetchNavItems();
+  }, []);
+
+  const fetchNavItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('header_nav_items')
+        .select('*')
+        .eq('is_active', true)
+        .order('item_order', { ascending: true });
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setNavItems(data);
+      }
+    } catch (error) {
+      console.error('Error fetching nav items:', error);
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -63,25 +103,18 @@ export const Header = () => {
           </div>
 
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link to="/belt-builder" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2">
-              <span>Belt Builder</span>
-              <span className="text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full whitespace-nowrap">NEW</span>
-            </Link>
-            <Link to="/products?category=belt" className="text-sm font-medium hover:text-primary transition-colors">
-              Belts
-            </Link>
-            <Link to="/products?category=buckle" className="text-sm font-medium hover:text-primary transition-colors">
-              Buckles
-            </Link>
-            <Link to="/products?category=jewelry" className="text-sm font-medium hover:text-primary transition-colors">
-              Jewelry
-            </Link>
-            <Link to="/products?category=hat" className="text-sm font-medium hover:text-primary transition-colors">
-              Hats
-            </Link>
-            <Link to="/about" className="text-sm font-medium hover:text-primary transition-colors">
-              Craftsmanship
-            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.id}
+                to={item.url}
+                className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2"
+              >
+                <span>{item.name}</span>
+                {item.name === 'Belt Builder' && (
+                  <span className="text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full whitespace-nowrap">NEW</span>
+                )}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center space-x-4">

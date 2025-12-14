@@ -6,10 +6,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Shield, Plus, Package, Loader2, Trash2, Pencil } from 'lucide-react';
+import { Shield, Plus, Package, Loader2, Trash2, Pencil, BookOpen, Menu } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import ProductForm from '@/components/admin/ProductForm';
+import { MagazineManager } from '@/components/admin/MagazineManager';
+import { NavManager } from '@/components/admin/NavManager';
 
 interface Product {
   id: string;
@@ -217,89 +220,116 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-12">
-      <div className="container mx-auto px-4 max-w-6xl">
+      <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex items-center gap-3 mb-8">
           <Shield className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Add Product Form */}
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Add New Product
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProductForm
-                onSubmit={handleAddProduct}
-                isSubmitting={isSubmitting}
-                mode="add"
-              />
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="products" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="magazine" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Magazine
+            </TabsTrigger>
+            <TabsTrigger value="navigation" className="flex items-center gap-2">
+              <Menu className="h-4 w-4" />
+              Navigation
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Products List */}
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Products ({products.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loadingProducts ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <div className="max-h-[600px] overflow-y-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead className="w-[100px]">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {products.map((product) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell className="capitalize">{product.category}</TableCell>
-                          <TableCell>₹{product.price.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openEditDialog(product)}
-                                className="text-muted-foreground hover:text-foreground"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDelete(product.id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="products">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Add Product Form */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
+                    Add New Product
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ProductForm
+                    onSubmit={handleAddProduct}
+                    isSubmitting={isSubmitting}
+                    mode="add"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Products List */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Products ({products.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingProducts ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="max-h-[600px] overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead className="w-[100px]">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {products.map((product) => (
+                            <TableRow key={product.id}>
+                              <TableCell className="font-medium">{product.name}</TableCell>
+                              <TableCell className="capitalize">{product.category}</TableCell>
+                              <TableCell>₹{product.price.toLocaleString()}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => openEditDialog(product)}
+                                    className="text-muted-foreground hover:text-foreground"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDelete(product.id)}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="magazine">
+            <MagazineManager />
+          </TabsContent>
+
+          <TabsContent value="navigation">
+            <NavManager />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Edit Product Dialog */}
