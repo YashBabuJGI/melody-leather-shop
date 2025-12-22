@@ -16,21 +16,43 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+interface SubCategory {
+  name: string;
+  url: string;
+}
+
 interface NavItem {
   id: string;
   name: string;
   url: string;
   item_order: number;
   is_active: boolean;
+  subcategories?: SubCategory[];
 }
 
-const defaultNavItems = [
-  { id: '1', name: 'Belt Builder', url: '/belt-builder', item_order: 0, is_active: true },
-  { id: '2', name: 'Belts', url: '/products?category=belt', item_order: 1, is_active: true },
-  { id: '3', name: 'Buckles', url: '/products?category=buckle', item_order: 2, is_active: true },
-  { id: '4', name: 'Jewelry', url: '/products?category=jewelry', item_order: 3, is_active: true },
-  { id: '5', name: 'Hats', url: '/products?category=hat', item_order: 4, is_active: true },
-  { id: '6', name: 'Craftsmanship', url: '/about', item_order: 5, is_active: true },
+const defaultNavItems: NavItem[] = [
+  { id: '1', name: 'BELTS', url: '/products?category=belt', item_order: 0, is_active: true, subcategories: [
+    { name: 'Men', url: '/products?category=belt&gender=men' },
+    { name: 'Boys', url: '/products?category=belt&gender=boys' },
+    { name: 'Women', url: '/products?category=belt&gender=women' },
+    { name: 'Girls', url: '/products?category=belt&gender=girls' },
+  ]},
+  { id: '2', name: 'BUCKLES', url: '/products?category=buckle', item_order: 1, is_active: true },
+  { id: '3', name: 'BILLETS', url: '/products?category=billet', item_order: 2, is_active: true },
+  { id: '4', name: 'CONCHOS', url: '/products?category=concho', item_order: 3, is_active: true },
+  { id: '5', name: 'STRAPS', url: '/products?category=strap', item_order: 4, is_active: true, subcategories: [
+    { name: 'Watch Strap', url: '/products?category=strap&type=watch' },
+    { name: 'Belt Strap', url: '/products?category=strap&type=belt' },
+    { name: 'Guitar Strap', url: '/products?category=strap&type=guitar' },
+  ]},
+  { id: '6', name: 'APPARELS', url: '/products?category=apparel', item_order: 5, is_active: true, subcategories: [
+    { name: 'Men', url: '/products?category=apparel&gender=men' },
+    { name: 'Boys', url: '/products?category=apparel&gender=boys' },
+    { name: 'Women', url: '/products?category=apparel&gender=women' },
+    { name: 'Girls', url: '/products?category=apparel&gender=girls' },
+  ]},
+  { id: '7', name: 'SOUVENIRS & BAGS', url: '/products?category=souvenirs', item_order: 6, is_active: true },
+  { id: '8', name: 'LEATHER CARE', url: '/products?category=leather-care', item_order: 7, is_active: true },
 ];
 
 export const Header = () => {
@@ -102,18 +124,31 @@ export const Header = () => {
             </div>
           </div>
 
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-6">
             {navItems.map((item) => (
-              <Link
-                key={item.id}
-                to={item.url}
-                className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2"
-              >
-                <span>{item.name}</span>
-                {item.name === 'Belt Builder' && (
-                  <span className="text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full whitespace-nowrap">NEW</span>
+              <div key={item.id} className="relative group">
+                <Link
+                  to={item.url}
+                  className="text-xs font-medium hover:text-primary transition-colors"
+                >
+                  {item.name}
+                </Link>
+                {item.subcategories && item.subcategories.length > 0 && (
+                  <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="bg-background border border-border rounded-md shadow-lg py-2 min-w-[140px]">
+                      {item.subcategories.map((sub) => (
+                        <Link
+                          key={sub.name}
+                          to={sub.url}
+                          className="block px-4 py-2 text-xs hover:bg-muted transition-colors"
+                        >
+                          {sub.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </Link>
+              </div>
             ))}
           </nav>
 
