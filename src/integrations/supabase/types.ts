@@ -61,6 +61,7 @@ export type Database = {
           item_order: number
           name: string
           product_id: string | null
+          subcategories: Json | null
           updated_at: string
           url: string
         }
@@ -72,6 +73,7 @@ export type Database = {
           item_order?: number
           name: string
           product_id?: string | null
+          subcategories?: Json | null
           updated_at?: string
           url: string
         }
@@ -83,6 +85,7 @@ export type Database = {
           item_order?: number
           name?: string
           product_id?: string | null
+          subcategories?: Json | null
           updated_at?: string
           url?: string
         }

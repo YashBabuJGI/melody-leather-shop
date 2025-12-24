@@ -76,7 +76,15 @@ export const Header = () => {
 
       if (error) throw error;
       if (data && data.length > 0) {
-        setNavItems(data);
+        const mappedItems: NavItem[] = data.map((item) => ({
+          id: item.id,
+          name: item.name,
+          url: item.url,
+          item_order: item.item_order,
+          is_active: item.is_active,
+          subcategories: (item.subcategories as unknown as SubCategory[]) || [],
+        }));
+        setNavItems(mappedItems);
       }
     } catch (error) {
       console.error('Error fetching nav items:', error);
