@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Shield, Plus, Package, Loader2, Trash2, Pencil, BookOpen, Menu } from 'lucide-react';
+import { Shield, Plus, Package, Loader2, Trash2, Pencil, BookOpen, Menu, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import ProductForm from '@/components/admin/ProductForm';
 import { MagazineManager } from '@/components/admin/MagazineManager';
 import { NavManager } from '@/components/admin/NavManager';
@@ -58,6 +60,8 @@ const Admin = () => {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [comingSoonEnabled, setComingSoonEnabled] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -75,8 +79,45 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchProducts();
+      fetchComingSoonSetting();
     }
   }, [isAdmin]);
+
+  const fetchComingSoonSetting = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings' as any)
+        .select('value')
+        .eq('key', 'coming_soon')
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        const value = (data as any).value as { enabled?: boolean };
+        setComingSoonEnabled(value.enabled ?? false);
+      }
+    } catch (error) {
+      console.error('Error fetching coming soon setting:', error);
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
+
+  const handleComingSoonToggle = async (enabled: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('site_settings' as any)
+        .update({ value: { enabled } })
+        .eq('key', 'coming_soon');
+
+      if (error) throw error;
+      setComingSoonEnabled(enabled);
+      toast.success(enabled ? 'Coming Soon mode enabled' : 'Coming Soon mode disabled');
+    } catch (error) {
+      console.error('Error updating coming soon setting:', error);
+      toast.error('Failed to update setting');
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -227,7 +268,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -239,6 +280,10 @@ const Admin = () => {
             <TabsTrigger value="navigation" className="flex items-center gap-2">
               <Menu className="h-4 w-4" />
               Navigation
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -328,6 +373,35 @@ const Admin = () => {
 
           <TabsContent value="navigation">
             <NavManager />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Site Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <Label htmlFor="coming-soon" className="text-base font-medium">
+                      Coming Soon Mode
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Enable this to show a "Coming Soon" landing page instead of the main homepage
+                    </p>
+                  </div>
+                  <Switch
+                    id="coming-soon"
+                    checked={comingSoonEnabled}
+                    onCheckedChange={handleComingSoonToggle}
+                    disabled={loadingSettings}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
