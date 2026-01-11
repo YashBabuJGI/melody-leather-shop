@@ -3,16 +3,40 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/ProductCard';
 import { Product } from '@/types/product';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import { MagazineSection } from '@/components/MagazineSection';
 import { supabase } from '@/integrations/supabase/client';
+import ComingSoon from './ComingSoon';
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [isComingSoon, setIsComingSoon] = useState<boolean | null>(null);
 
   useEffect(() => {
+    fetchComingSoonSetting();
     fetchFeaturedProducts();
   }, []);
+
+  const fetchComingSoonSetting = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings' as any)
+        .select('value')
+        .eq('key', 'coming_soon')
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        const value = (data as any).value as { enabled?: boolean };
+        setIsComingSoon(value.enabled ?? false);
+      } else {
+        setIsComingSoon(false);
+      }
+    } catch (error) {
+      console.error('Error fetching coming soon setting:', error);
+      setIsComingSoon(false);
+    }
+  };
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -46,6 +70,20 @@ export default function Home() {
       console.error('Error fetching products:', error);
     }
   };
+
+  // Show loading while checking coming soon status
+  if (isComingSoon === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show Coming Soon page if enabled
+  if (isComingSoon) {
+    return <ComingSoon />;
+  }
 
   return (
     <div className="min-h-screen">
