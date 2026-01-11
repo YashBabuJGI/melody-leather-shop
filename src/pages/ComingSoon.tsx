@@ -39,7 +39,7 @@ export default function ComingSoon() {
         </h1>
 
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 animate-fade-in">
-          We're crafting something extraordinary. Premium leather goods, 
+          We are curating products for you. Premium leather goods, 
           meticulously designed for those who appreciate exceptional craftsmanship.
         </p>
 
