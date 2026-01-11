@@ -4,7 +4,15 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Sparkles, Mail } from 'lucide-react';
 
-export default function ComingSoon() {
+interface ComingSoonProps {
+  title?: string;
+  message?: string;
+}
+
+export default function ComingSoon({ 
+  title = 'Coming Soon', 
+  message = 'We are curating products for you. Premium leather goods, meticulously designed for those who appreciate exceptional craftsmanship.' 
+}: ComingSoonProps) {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,12 +43,11 @@ export default function ComingSoon() {
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight animate-fade-in">
-          Coming Soon
+          {title}
         </h1>
 
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 animate-fade-in">
-          We are curating products for you. Premium leather goods, 
-          meticulously designed for those who appreciate exceptional craftsmanship.
+          {message}
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto animate-fade-in">
