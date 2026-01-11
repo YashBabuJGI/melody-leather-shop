@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Shield, Plus, Package, Loader2, Trash2, Pencil, BookOpen, Menu, Settings } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -61,7 +62,10 @@ const Admin = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [comingSoonEnabled, setComingSoonEnabled] = useState(false);
+  const [comingSoonTitle, setComingSoonTitle] = useState('Coming Soon');
+  const [comingSoonMessage, setComingSoonMessage] = useState('We are curating products for you. Premium leather goods, meticulously designed for those who appreciate exceptional craftsmanship.');
   const [loadingSettings, setLoadingSettings] = useState(true);
+  const [savingMessage, setSavingMessage] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -93,8 +97,14 @@ const Admin = () => {
 
       if (error) throw error;
       if (data) {
-        const value = (data as any).value as { enabled?: boolean };
+        const value = (data as any).value as { 
+          enabled?: boolean; 
+          title?: string; 
+          message?: string; 
+        };
         setComingSoonEnabled(value.enabled ?? false);
+        setComingSoonTitle(value.title ?? 'Coming Soon');
+        setComingSoonMessage(value.message ?? 'We are curating products for you. Premium leather goods, meticulously designed for those who appreciate exceptional craftsmanship.');
       }
     } catch (error) {
       console.error('Error fetching coming soon setting:', error);
@@ -105,9 +115,17 @@ const Admin = () => {
 
   const handleComingSoonToggle = async (enabled: boolean) => {
     try {
+      const { data: currentData } = await supabase
+        .from('site_settings' as any)
+        .select('value')
+        .eq('key', 'coming_soon')
+        .maybeSingle();
+      
+      const currentValue = (currentData as any)?.value || {};
+      
       const { error } = await supabase
         .from('site_settings' as any)
-        .update({ value: { enabled } })
+        .update({ value: { ...currentValue, enabled } })
         .eq('key', 'coming_soon');
 
       if (error) throw error;
@@ -116,6 +134,35 @@ const Admin = () => {
     } catch (error) {
       console.error('Error updating coming soon setting:', error);
       toast.error('Failed to update setting');
+    }
+  };
+
+  const handleSaveComingSoonMessage = async () => {
+    if (comingSoonTitle.length > 100 || comingSoonMessage.length > 500) {
+      toast.error('Title must be under 100 characters and message under 500 characters');
+      return;
+    }
+    
+    setSavingMessage(true);
+    try {
+      const { error } = await supabase
+        .from('site_settings' as any)
+        .update({ 
+          value: { 
+            enabled: comingSoonEnabled, 
+            title: comingSoonTitle.trim(), 
+            message: comingSoonMessage.trim() 
+          } 
+        })
+        .eq('key', 'coming_soon');
+
+      if (error) throw error;
+      toast.success('Coming Soon message updated');
+    } catch (error) {
+      console.error('Error updating coming soon message:', error);
+      toast.error('Failed to update message');
+    } finally {
+      setSavingMessage(false);
     }
   };
 
@@ -399,6 +446,57 @@ const Admin = () => {
                     onCheckedChange={handleComingSoonToggle}
                     disabled={loadingSettings}
                   />
+                </div>
+
+                <div className="p-4 border rounded-lg space-y-4">
+                  <div className="space-y-1">
+                    <Label className="text-base font-medium">
+                      Coming Soon Page Content
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Customize the title and message shown on the Coming Soon page
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="coming-soon-title">Title (max 100 characters)</Label>
+                      <Input
+                        id="coming-soon-title"
+                        value={comingSoonTitle}
+                        onChange={(e) => setComingSoonTitle(e.target.value)}
+                        placeholder="Coming Soon"
+                        maxLength={100}
+                        disabled={loadingSettings}
+                      />
+                      <p className="text-xs text-muted-foreground text-right">
+                        {comingSoonTitle.length}/100
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="coming-soon-message">Message (max 500 characters)</Label>
+                      <textarea
+                        id="coming-soon-message"
+                        value={comingSoonMessage}
+                        onChange={(e) => setComingSoonMessage(e.target.value)}
+                        placeholder="We are curating products for you..."
+                        maxLength={500}
+                        disabled={loadingSettings}
+                        className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                      <p className="text-xs text-muted-foreground text-right">
+                        {comingSoonMessage.length}/500
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleSaveComingSoonMessage}
+                      disabled={savingMessage || loadingSettings}
+                    >
+                      {savingMessage ? 'Saving...' : 'Save Message'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

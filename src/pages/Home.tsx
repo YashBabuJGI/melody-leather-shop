@@ -11,6 +11,8 @@ import ComingSoon from './ComingSoon';
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isComingSoon, setIsComingSoon] = useState<boolean | null>(null);
+  const [comingSoonTitle, setComingSoonTitle] = useState('Coming Soon');
+  const [comingSoonMessage, setComingSoonMessage] = useState('We are curating products for you. Premium leather goods, meticulously designed for those who appreciate exceptional craftsmanship.');
 
   useEffect(() => {
     fetchComingSoonSetting();
@@ -27,8 +29,14 @@ export default function Home() {
 
       if (error) throw error;
       if (data) {
-        const value = (data as any).value as { enabled?: boolean };
+        const value = (data as any).value as { 
+          enabled?: boolean; 
+          title?: string; 
+          message?: string; 
+        };
         setIsComingSoon(value.enabled ?? false);
+        setComingSoonTitle(value.title ?? 'Coming Soon');
+        setComingSoonMessage(value.message ?? 'We are curating products for you. Premium leather goods, meticulously designed for those who appreciate exceptional craftsmanship.');
       } else {
         setIsComingSoon(false);
       }
@@ -82,7 +90,7 @@ export default function Home() {
 
   // Show Coming Soon page if enabled
   if (isComingSoon) {
-    return <ComingSoon />;
+    return <ComingSoon title={comingSoonTitle} message={comingSoonMessage} />;
   }
 
   return (
