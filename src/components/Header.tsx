@@ -124,235 +124,209 @@ export const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      {/* Top Row: Gender Toggle | Logo | Icons */}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Mobile Menu Trigger */}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
-              <SheetHeader className="p-4 border-b border-border">
-                <div className="flex items-center justify-between">
-                  <SheetTitle className="text-xl font-bold text-gradient-leather">
-                    WYOMING SPUR
-                  </SheetTitle>
+          {/* Left: Mobile Menu + Gender Toggle */}
+          <div className="flex items-center gap-4 flex-1">
+            {/* Mobile Menu Trigger */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
+                <SheetHeader className="p-4 border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="text-xl font-bold text-gradient-leather">
+                      WYOMING SPUR
+                    </SheetTitle>
+                  </div>
+                </SheetHeader>
+                
+                {/* Gender Toggle in Mobile */}
+                <div className="p-4 border-b border-border">
+                  <div className="flex items-center bg-muted rounded-full p-1 relative">
+                    <div 
+                      className={`absolute h-8 w-1/2 bg-primary rounded-full transition-transform duration-300 ease-out ${
+                        gender === 'women' ? 'translate-x-full' : 'translate-x-0'
+                      }`}
+                    />
+                    <button
+                      onClick={() => setGender('men')}
+                      className={`relative z-10 flex-1 py-1 text-sm font-medium rounded-full transition-colors duration-300 ${
+                        gender === 'men' ? 'text-primary-foreground' : 'text-muted-foreground'
+                      }`}
+                    >
+                      Men
+                    </button>
+                    <button
+                      onClick={() => setGender('women')}
+                      className={`relative z-10 flex-1 py-1 text-sm font-medium rounded-full transition-colors duration-300 ${
+                        gender === 'women' ? 'text-primary-foreground' : 'text-muted-foreground'
+                      }`}
+                    >
+                      Women
+                    </button>
+                  </div>
                 </div>
-              </SheetHeader>
-              
-              {/* Gender Toggle in Mobile */}
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center bg-muted rounded-full p-1 relative">
-                  <div 
-                    className={`absolute h-8 w-1/2 bg-primary rounded-full transition-transform duration-300 ease-out ${
-                      gender === 'women' ? 'translate-x-full' : 'translate-x-0'
-                    }`}
-                  />
-                  <button
-                    onClick={() => setGender('men')}
-                    className={`relative z-10 flex-1 py-1 text-sm font-medium rounded-full transition-colors duration-300 ${
-                      gender === 'men' ? 'text-primary-foreground' : 'text-muted-foreground'
-                    }`}
-                  >
-                    Men
-                  </button>
-                  <button
-                    onClick={() => setGender('women')}
-                    className={`relative z-10 flex-1 py-1 text-sm font-medium rounded-full transition-colors duration-300 ${
-                      gender === 'women' ? 'text-primary-foreground' : 'text-muted-foreground'
-                    }`}
-                  >
-                    Women
-                  </button>
-                </div>
-              </div>
 
-              {/* Navigation Items */}
-              <nav className="flex-1 overflow-y-auto py-2">
-                {navItems.map((item) => (
-                  <div key={item.id} className="border-b border-border/50">
-                    {item.subcategories && item.subcategories.length > 0 ? (
-                      <Collapsible
-                        open={expandedItems.has(item.id)}
-                        onOpenChange={() => toggleExpanded(item.id)}
-                      >
-                        <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium hover:bg-muted/50 transition-colors">
-                          <span>{item.name}</span>
-                          {expandedItems.has(item.id) ? (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="bg-muted/30 py-1">
-                            <SheetClose asChild>
-                              <Link
-                                to={item.url}
-                                className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                                onClick={closeMobileMenu}
-                              >
-                                View All {item.name}
-                              </Link>
-                            </SheetClose>
-                            {item.subcategories.map((sub) => (
-                              <SheetClose asChild key={sub.name}>
+                {/* Navigation Items */}
+                <nav className="flex-1 overflow-y-auto py-2">
+                  {navItems.map((item) => (
+                    <div key={item.id} className="border-b border-border/50">
+                      {item.subcategories && item.subcategories.length > 0 ? (
+                        <Collapsible
+                          open={expandedItems.has(item.id)}
+                          onOpenChange={() => toggleExpanded(item.id)}
+                        >
+                          <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium hover:bg-muted/50 transition-colors">
+                            <span>{item.name}</span>
+                            {expandedItems.has(item.id) ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="bg-muted/30 py-1">
+                              <SheetClose asChild>
                                 <Link
-                                  to={sub.url}
+                                  to={item.url}
                                   className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                                   onClick={closeMobileMenu}
                                 >
-                                  {sub.name}
+                                  View All {item.name}
                                 </Link>
                               </SheetClose>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ) : (
-                      <SheetClose asChild>
-                        <Link
-                          to={item.url}
-                          className="block px-4 py-3 text-sm font-medium hover:bg-muted/50 transition-colors"
-                          onClick={closeMobileMenu}
-                        >
-                          {item.name}
-                        </Link>
-                      </SheetClose>
-                    )}
-                  </div>
-                ))}
-              </nav>
+                              {item.subcategories.map((sub) => (
+                                <SheetClose asChild key={sub.name}>
+                                  <Link
+                                    to={sub.url}
+                                    className="block px-6 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                                    onClick={closeMobileMenu}
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                </SheetClose>
+                              ))}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ) : (
+                        <SheetClose asChild>
+                          <Link
+                            to={item.url}
+                            className="block px-4 py-3 text-sm font-medium hover:bg-muted/50 transition-colors"
+                            onClick={closeMobileMenu}
+                          >
+                            {item.name}
+                          </Link>
+                        </SheetClose>
+                      )}
+                    </div>
+                  ))}
+                </nav>
 
-              {/* Mobile Footer Links */}
-              <div className="border-t border-border p-4 space-y-2">
-                {user ? (
-                  <>
-                    <SheetClose asChild>
-                      <Link
-                        to="/orders"
-                        className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
-                        onClick={closeMobileMenu}
-                      >
-                        <Package className="h-4 w-4" />
-                        My Orders
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        to="/settings"
-                        className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
-                        onClick={closeMobileMenu}
-                      >
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </Link>
-                    </SheetClose>
-                    {isAdmin && (
+                {/* Mobile Footer Links */}
+                <div className="border-t border-border p-4 space-y-2">
+                  {user ? (
+                    <>
                       <SheetClose asChild>
                         <Link
-                          to="/admin"
+                          to="/orders"
                           className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
                           onClick={closeMobileMenu}
                         >
-                          <Shield className="h-4 w-4" />
-                          Admin Dashboard
+                          <Package className="h-4 w-4" />
+                          My Orders
                         </Link>
                       </SheetClose>
-                    )}
-                    <button
-                      onClick={() => {
-                        signOut();
-                        closeMobileMenu();
-                      }}
-                      className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors w-full text-left text-destructive"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </button>
-                  </>
-                ) : (
-                  <SheetClose asChild>
-                    <Link
-                      to="/auth"
-                      className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
-                      onClick={closeMobileMenu}
-                    >
-                      <LogIn className="h-4 w-4" />
-                      Sign In
-                    </Link>
-                  </SheetClose>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold tracking-tight text-gradient-leather">
-                WYOMING SPUR
-              </h1>
-            </Link>
+                      <SheetClose asChild>
+                        <Link
+                          to="/settings"
+                          className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
+                          onClick={closeMobileMenu}
+                        >
+                          <Settings className="h-4 w-4" />
+                          Settings
+                        </Link>
+                      </SheetClose>
+                      {isAdmin && (
+                        <SheetClose asChild>
+                          <Link
+                            to="/admin"
+                            className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
+                            onClick={closeMobileMenu}
+                          >
+                            <Shield className="h-4 w-4" />
+                            Admin Dashboard
+                          </Link>
+                        </SheetClose>
+                      )}
+                      <button
+                        onClick={() => {
+                          signOut();
+                          closeMobileMenu();
+                        }}
+                        className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors w-full text-left text-destructive"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <SheetClose asChild>
+                      <Link
+                        to="/auth"
+                        className="flex items-center gap-2 px-2 py-2 text-sm hover:bg-muted rounded-md transition-colors"
+                        onClick={closeMobileMenu}
+                      >
+                        <LogIn className="h-4 w-4" />
+                        Sign In
+                      </Link>
+                    </SheetClose>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
 
             {/* Gender Toggle - Desktop */}
-            <div className="hidden md:flex items-center bg-muted rounded-full p-1 relative">
-              <div 
-                className={`absolute h-8 w-16 bg-primary rounded-full transition-transform duration-300 ease-out ${
-                  gender === 'women' ? 'translate-x-16' : 'translate-x-0'
-                }`}
-              />
+            <div className="hidden md:flex items-center">
               <button
                 onClick={() => setGender('men')}
-                className={`relative z-10 px-4 py-1 text-sm font-medium rounded-full transition-colors duration-300 ${
-                  gender === 'men' ? 'text-primary-foreground' : 'text-muted-foreground'
+                className={`px-4 py-1 text-sm font-medium tracking-wider transition-colors border-b-2 ${
+                  gender === 'men' 
+                    ? 'text-foreground border-foreground' 
+                    : 'text-muted-foreground border-transparent hover:text-foreground'
                 }`}
               >
-                Men
+                MEN
               </button>
               <button
                 onClick={() => setGender('women')}
-                className={`relative z-10 px-4 py-1 text-sm font-medium rounded-full transition-colors duration-300 ${
-                  gender === 'women' ? 'text-primary-foreground' : 'text-muted-foreground'
+                className={`px-4 py-1 text-sm font-medium tracking-wider transition-colors border-b-2 ${
+                  gender === 'women' 
+                    ? 'text-foreground border-foreground' 
+                    : 'text-muted-foreground border-transparent hover:text-foreground'
                 }`}
               >
-                Women
+                WOMEN
               </button>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
-            {navItems.map((item) => (
-              <div key={item.id} className="relative group">
-                <Link
-                  to={item.url}
-                  className="text-xs font-medium hover:text-primary transition-colors"
-                >
-                  {item.name}
-                </Link>
-                {item.subcategories && item.subcategories.length > 0 && (
-                  <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="bg-background border border-border rounded-md shadow-lg py-2 min-w-[140px]">
-                      {item.subcategories.map((sub) => (
-                        <Link
-                          key={sub.name}
-                          to={sub.url}
-                          className="block px-4 py-2 text-xs hover:bg-muted transition-colors"
-                        >
-                          {sub.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
+          {/* Center: Logo */}
+          <Link to="/" className="absolute left-1/2 -translate-x-1/2">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gradient-leather whitespace-nowrap">
+              WYOMING SPUR
+            </h1>
+          </Link>
 
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
+          {/* Right: Icons */}
+          <div className="flex items-center space-x-2 flex-1 justify-end">
+            <Button variant="ghost" size="icon" className="hidden sm:flex">
               <Search className="h-5 w-5" />
             </Button>
             
@@ -425,6 +399,39 @@ export const Header = () => {
               </Button>
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Navigation - Desktop Only */}
+      <div className="hidden lg:block border-t border-border/50">
+        <div className="container mx-auto px-4">
+          <nav className="flex items-center justify-center space-x-8 h-12">
+            {navItems.map((item) => (
+              <div key={item.id} className="relative group">
+                <Link
+                  to={item.url}
+                  className="text-xs font-medium tracking-wider hover:text-primary transition-colors"
+                >
+                  {item.name}
+                </Link>
+                {item.subcategories && item.subcategories.length > 0 && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="bg-background border border-border rounded-md shadow-lg py-2 min-w-[140px]">
+                      {item.subcategories.map((sub) => (
+                        <Link
+                          key={sub.name}
+                          to={sub.url}
+                          className="block px-4 py-2 text-xs hover:bg-muted transition-colors"
+                        >
+                          {sub.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
         </div>
       </div>
     </header>
