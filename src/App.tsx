@@ -52,6 +52,7 @@ const AppContent = () => {
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="/about" element={<About />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/billing" element={<Billing />} />
