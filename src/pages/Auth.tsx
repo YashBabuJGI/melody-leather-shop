@@ -198,6 +198,45 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
+                {forgotSent && (
+                  <p className="text-xs text-center text-muted-foreground">
+                    If a reset link was requested, it has been sent. Check your email inbox.
+                  </p>
+                )}
+                {showForgot ? (
+                  <form onSubmit={handleForgotPassword} className="space-y-3 pt-2 border-t border-border">
+                    <div className="space-y-2">
+                      <Label htmlFor="forgot-email">Account Email</Label>
+                      <Input
+                        id="forgot-email"
+                        name="forgot-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        required
+                      />
+                    </div>
+                    <Button type="submit" variant="outline" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'Sending link...' : 'Send Reset Link'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowForgot(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </form>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="w-full text-sm"
+                    onClick={() => { setShowForgot(true); setForgotSent(false); }}
+                  >
+                    Forgot password?
+                  </Button>
+                )}
               </form>
             </TabsContent>
 
