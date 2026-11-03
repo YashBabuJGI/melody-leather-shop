@@ -11,9 +11,11 @@ import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
 const Auth = () => {
-  const { signUp, signIn, user } = useAuth();
+  const { signUp, signIn, resetPassword, user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
 
   // Redirect if already logged in
   if (user) {
@@ -48,6 +50,21 @@ const Auth = () => {
     const password = formData.get('signin-password') as string;
 
     await signIn(email, password);
+    setIsLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('forgot-email') as string;
+
+    const { error } = await resetPassword(email);
+    if (!error) {
+      setForgotSent(true);
+      setShowForgot(false);
+    }
     setIsLoading(false);
   };
 
