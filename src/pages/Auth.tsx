@@ -11,9 +11,11 @@ import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 
 const Auth = () => {
-  const { signUp, signIn, user } = useAuth();
+  const { signUp, signIn, resetPassword, user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
 
   // Redirect if already logged in
   if (user) {
@@ -48,6 +50,21 @@ const Auth = () => {
     const password = formData.get('signin-password') as string;
 
     await signIn(email, password);
+    setIsLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('forgot-email') as string;
+
+    const { error } = await resetPassword(email);
+    if (!error) {
+      setForgotSent(true);
+      setShowForgot(false);
+    }
     setIsLoading(false);
   };
 
@@ -157,31 +174,73 @@ const Auth = () => {
             </TabsList>
 
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    name="signin-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    name="signin-password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
+              {showForgot ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Enter the email you signed up with and we'll send you a password reset link.
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Account Email</Label>
+                    <Input
+                      id="forgot-email"
+                      name="forgot-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Sending link...' : 'Send Reset Link'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setShowForgot(false)}
+                  >
+                    Back to Sign In
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      name="signin-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input
+                      id="signin-password"
+                      name="signin-password"
+                      type="password"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Signing in...' : 'Sign In'}
+                  </Button>
+                  {forgotSent && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      If a reset link was requested, it has been sent. Check your email inbox.
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="w-full text-sm"
+                    onClick={() => { setShowForgot(true); setForgotSent(false); }}
+                  >
+                    Forgot password?
+                  </Button>
+                </form>
+              )}
             </TabsContent>
 
             <TabsContent value="signup">
