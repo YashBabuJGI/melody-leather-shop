@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+const PUBLIC_STORE_URL = 'https://melody-leather-shop.lovable.app';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -83,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${PUBLIC_STORE_URL}/reset-password`,
     });
 
     if (error) {
