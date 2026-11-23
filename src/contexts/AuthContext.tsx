@@ -4,7 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-const PUBLIC_STORE_URL = 'https://melody-leather-shop.lovable.app';
+const getPasswordResetRedirectUrl = () => {
+  const currentOrigin = window.location.origin;
+  const hostname = window.location.hostname;
+
+  if (hostname === 'localhost') {
+    return `${currentOrigin.replace('localhost', '127.0.0.1')}/reset-password`;
+  }
+
+  const isLovablePreview = hostname.startsWith('id-preview--') || hostname.endsWith('lovableproject.com');
+  const redirectOrigin = isLovablePreview ? 'https://melody-leather-shop.lovable.app' : currentOrigin;
+  return `${redirectOrigin}/reset-password`;
+};
 
 interface AuthContextType {
   user: User | null;
@@ -85,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${PUBLIC_STORE_URL}/reset-password`,
+      redirectTo: getPasswordResetRedirectUrl(),
     });
 
     if (error) {
